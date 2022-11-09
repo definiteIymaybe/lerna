@@ -14,22 +14,19 @@ interface NormalizedSchema extends E2eProjectGeneratorSchema {
   projectName: string;
   projectRoot: string;
   projectDirectory: string;
-  parsedTags: string[];
 }
 
 function normalizeOptions(tree: Tree, options: E2eProjectGeneratorSchema): NormalizedSchema {
   const name = names(options.name).fileName;
-  const projectDirectory = options.directory ? `${names(options.directory).fileName}/${name}` : name;
+  const projectDirectory = options.directory ? `e2e/${names(options.directory).fileName}/${name}` : name;
   const projectName = projectDirectory.replace(new RegExp("/", "g"), "-");
   const projectRoot = `${getWorkspaceLayout(tree).libsDir}/${projectDirectory}`;
-  const parsedTags = options.tags ? options.tags.split(",").map((s) => s.trim()) : [];
 
   return {
     ...options,
     projectName,
     projectRoot,
     projectDirectory,
-    parsedTags,
   };
 }
 
@@ -77,7 +74,6 @@ export default async function (tree: Tree, options: E2eProjectGeneratorSchema) {
         outputs: [`{workspaceRoot}/coverage/${normalizedOptions.projectRoot}`],
       },
     },
-    tags: normalizedOptions.parsedTags,
   });
   addFiles(tree, normalizedOptions);
   await formatFiles(tree);
