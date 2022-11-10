@@ -8,14 +8,17 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "ES2021",
     "module": "esnext",
-    "lib": ["es2017", "dom"],
+    "lib": ["ES2021"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "paths": {
-      "@lerna/nx-plugin": ["packages/nx-plugin/src/index.ts"]
+      "@lerna/e2e-utils": ["libs/e2e-utils/src/index.ts"],
+      "@lerna/nx-plugin": ["libs/nx-plugin/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

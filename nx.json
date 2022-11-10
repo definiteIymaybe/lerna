@@ -1,5 +1,6 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "npmScope": "lerna",
   "tasksRunnerOptions": {
     "default": {
       "runner": "@nrwl/nx-cloud",
@@ -19,8 +20,8 @@
     ]
   },
   "workspaceLayout": {
-    "libsDir": "",
-    "appsDir": ""
+    "libsDir": "libs",
+    "appsDir": "packages"
   },
   "targetDefaults": {
     "test": {

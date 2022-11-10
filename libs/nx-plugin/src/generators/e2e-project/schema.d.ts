@@ -1,4 +1,4 @@
 export interface E2eProjectGeneratorSchema {
-    name: string;
-    directory?: string;
+  name: string;
+  directory?: string;
 }
