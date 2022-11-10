@@ -1,5 +1,5 @@
 {
-  "name": "e2ee-repair",
+  "name": "e2ee-info",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "tags": [],
   "targets": {
@@ -14,7 +14,7 @@
             "command": "npm run e2e-build-package-publish"
           },
           {
-            "command": "PUBLISHED_VERSION=999.9.9-e2e.0 nx run-e2e-tests e2ee-repair"
+            "command": "PUBLISHED_VERSION=999.9.9-e2e.0 nx run-e2e-tests e2ee-info"
           }
         ],
         "parallel": false
@@ -23,17 +23,17 @@
     "run-e2e-tests": {
       "executor": "@nrwl/jest:jest",
       "options": {
-        "jestConfig": "e2ee/repair/jest.config.ts",
+        "jestConfig": "e2ee/info/jest.config.ts",
         "passWithNoTests": true,
         "runInBand": true
       },
-      "outputs": ["{workspaceRoot}/coverage/e2ee/repair"]
+      "outputs": ["{workspaceRoot}/coverage/e2ee/info"]
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["e2ee/repair/**/*.ts"]
+        "lintFilePatterns": ["e2ee/info/**/*.ts"]
       }
     }
   }

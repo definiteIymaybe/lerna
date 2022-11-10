@@ -13,10 +13,11 @@ If your e2e tests fail when trying to create a workspace, remove your npx cache.
 
 const DIRECTORIES_TO_REMOVE = [
   "./dist",
-  "./build", // is this relevant?
   "/tmp/lerna-e2e",
   "./tmp/local-registry",
 ];
+
+// ============================= JH: extracted the above customization points to constants
 
 process.env.npm_config_registry = `http://localhost:4872`;
 process.env.YARN_REGISTRY = process.env.npm_config_registry;
@@ -28,6 +29,7 @@ async function buildPackagePublishAndCleanPorts() {
     }
     await Promise.all(DIRECTORIES_TO_REMOVE.map((dir) => remove(dir)));
   }
+  // JH: changed from ./build to ./dist
   if (!process.env.NX_E2E_SKIP_BUILD_CLEANUP || !existsSync("./dist")) {
     try {
       await updateVersionsAndPublishPackages();
@@ -43,7 +45,8 @@ async function buildPackagePublishAndCleanPorts() {
 async function updateVersionsAndPublishPackages() {
   console.log(`\n${NX_PREFIX} 📦 Publishing packages\n`);
   const isVerbose = process.env.NX_VERBOSE_LOGGING === "true" || process.argv.includes("--verbose");
-  const response = execSync(`yarn nx-release major --local`, {
+  // JH: changed version to fixed 999.9.9-e2e.0
+  const response = execSync(`yarn nx-release 999.9.9-e2e.0 --local`, {
     stdio: isVerbose ? "inherit" : "pipe",
     encoding: "utf8",
   });

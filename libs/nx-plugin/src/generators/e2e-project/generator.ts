@@ -1,7 +1,7 @@
-import { formatFiles, generateFiles, getWorkspaceLayout, names, offsetFromRoot, Tree } from "@nrwl/devkit";
+import { formatFiles, names, readProjectConfiguration, Tree, updateProjectConfiguration } from "@nrwl/devkit";
 import { addPropertyToJestConfig } from "@nrwl/jest/src/utils/config/update-config";
-import libraryGenerator from "@nrwl/js/src/generators/library/library";
-import * as path from "path";
+import { projectGenerator } from "@nrwl/js/src/generators/library/library";
+import { resolve } from "path";
 import { E2eProjectGeneratorSchema } from "./schema";
 
 interface NormalizedSchema extends E2eProjectGeneratorSchema {
@@ -10,11 +10,11 @@ interface NormalizedSchema extends E2eProjectGeneratorSchema {
   projectDirectory: string;
 }
 
-function normalizeOptions(tree: Tree, options: E2eProjectGeneratorSchema): NormalizedSchema {
+function normalizeOptions(_tree: Tree, options: E2eProjectGeneratorSchema): NormalizedSchema {
   const e2eRoot = "e2ee";
   const projectDirectory = options.directory ? `${e2eRoot}/${names(options.directory).fileName}` : e2eRoot;
-  const projectName = names(options.name).fileName;
-  const projectRoot = `${getWorkspaceLayout(tree).libsDir}/${projectDirectory}/${projectName}`;
+  const projectRoot = `${projectDirectory}/${names(options.name).fileName}`;
+  const projectName = `${e2eRoot}-${names(options.name).fileName}`;
 
   return {
     ...options,
@@ -24,24 +24,19 @@ function normalizeOptions(tree: Tree, options: E2eProjectGeneratorSchema): Norma
   };
 }
 
-function addFiles(tree: Tree, options: NormalizedSchema) {
-  const templateOptions = {
-    ...options,
-    ...names(options.name),
-    offsetFromRoot: offsetFromRoot(options.projectRoot),
-    template: "",
-  };
-  generateFiles(tree, path.join(__dirname, "files"), options.projectRoot, templateOptions);
-}
-
 export default async function (tree: Tree, options: E2eProjectGeneratorSchema) {
   const normalizedOptions = normalizeOptions(tree, options);
 
-  await libraryGenerator(tree, {
-    name: normalizedOptions.name,
-    directory: normalizedOptions.projectDirectory,
-    skipTsConfig: true,
-  });
+  await projectGenerator(
+    tree,
+    {
+      name: normalizedOptions.name,
+      directory: normalizedOptions.projectDirectory,
+      skipTsConfig: true,
+    },
+    "./",
+    resolve("node_modules/@nrwl/js/src/generators/library/files")
+  );
 
   tree.delete(`${normalizedOptions.projectRoot}/README.md`);
 
@@ -52,40 +47,56 @@ export default async function (tree: Tree, options: E2eProjectGeneratorSchema) {
   addPropertyToJestConfig(tree, `${normalizedOptions.projectRoot}/jest.config.ts`, "maxWorkers", 1, {
     valueAsString: false,
   });
+  addPropertyToJestConfig(tree, `${normalizedOptions.projectRoot}/jest.config.ts`, "testTimeout", 60000, {
+    valueAsString: false,
+  });
 
-  // addProjectConfiguration(tree, normalizedOptions.projectName, {
-  //   root: normalizedOptions.projectRoot,
-  //   projectType: "application",
-  //   sourceRoot: `${normalizedOptions.projectRoot}`,
-  //   targets: {
-  //     e2e: {
-  //       executor: "nx:run-commands",
-  //       options: {
-  //         commands: [
-  //           {
-  //             command: "npm run e2e-start-local-registry",
-  //           },
-  //           {
-  //             command: "npm run e2e-build-package-publish",
-  //           },
-  //           {
-  //             command: `nx run-e2e-tests ${normalizedOptions.projectName}`,
-  //           },
-  //         ],
-  //         parallel: false,
-  //       },
-  //     },
-  //     "run-e2e-tests": {
-  //       executor: "@nrwl/jest:jest",
-  //       options: {
-  //         jestConfig: `${normalizedOptions.projectRoot}/jest.config.ts`,
-  //         passWithNoTests: true,
-  //         runInBand: true,
-  //       },
-  //       outputs: [`{workspaceRoot}/coverage/${normalizedOptions.projectRoot}`],
-  //     },
-  //   },
-  // });
-  // addFiles(tree, normalizedOptions);
+  const projectConfig = readProjectConfiguration(tree, normalizedOptions.projectName);
+
+  updateProjectConfiguration(tree, normalizedOptions.projectName, {
+    ...projectConfig,
+    targets: {
+      e2e: {
+        executor: "nx:run-commands",
+        options: {
+          commands: [
+            {
+              command: "npm run e2e-start-local-registry",
+            },
+            {
+              command: "npm run e2e-build-package-publish",
+            },
+            {
+              command: `PUBLISHED_VERSION=999.9.9-e2e.0 nx run-e2e-tests ${normalizedOptions.projectName}`,
+            },
+          ],
+          parallel: false,
+        },
+      },
+      "run-e2e-tests": {
+        executor: "@nrwl/jest:jest",
+        options: {
+          jestConfig: `${normalizedOptions.projectRoot}/jest.config.ts`,
+          passWithNoTests: true,
+          runInBand: true,
+        },
+        outputs: [`{workspaceRoot}/coverage/${normalizedOptions.projectRoot}`],
+      },
+      lint: projectConfig.targets.lint,
+      // Don't keep the original unit test target
+    },
+  });
+
+  tree.write(
+    `${normalizedOptions.projectRoot}/src/index.ts`,
+    `// Add e2e tests for ${options.name} in this file
+`
+  );
+
+  tree.rename(
+    `${normalizedOptions.projectRoot}/src/index.ts`,
+    `${normalizedOptions.projectRoot}/src/${options.name}.spec.ts`
+  );
+
   await formatFiles(tree);
 }

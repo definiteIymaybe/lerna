@@ -1,55 +1,58 @@
 #!/usr/bin/env node
-import * as yargs from 'yargs';
-import { execSync } from 'child_process';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { URL } from 'url';
-import { join } from 'path';
+import * as yargs from "yargs";
+import { execSync } from "child_process";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { URL } from "url";
+import { join } from "path";
 
-import * as version from '@lerna/version/index';
-import * as publish from '@lerna/publish/index';
+// JH: removed * as from both of these because of different tsconfig settings between lerna and nx
+import version from "@lerna/version/index";
+import publish from "@lerna/publish/index";
 
 function hideFromGitIndex(uncommittedFiles: string[]) {
-  execSync(`git update-index --assume-unchanged ${uncommittedFiles.join(' ')}`);
+  execSync(`git update-index --assume-unchanged ${uncommittedFiles.join(" ")}`);
 
-  return () =>
-    execSync(
-      `git update-index --no-assume-unchanged ${uncommittedFiles.join(' ')}`
-    );
+  return () => execSync(`git update-index --no-assume-unchanged ${uncommittedFiles.join(" ")}`);
 }
 
 (async () => {
   const options = parseArgs();
   if (!options.local && !options.force) {
-    console.log('Authenticating to NPM');
-    execSync('npm adduser', {
+    console.log("Authenticating to NPM");
+    execSync("npm adduser", {
       stdio: [0, 1, 2],
     });
   }
 
   if (options.clearLocalRegistry) {
-    execSync('yarn local-registry clear');
+    execSync("yarn local-registry clear");
   }
 
-  const buildCommand = 'yarn build';
+  const buildCommand = "yarn build";
   console.log(`> ${buildCommand}`);
   execSync(buildCommand, {
     stdio: [0, 1, 2],
   });
 
   if (options.local) {
+    // JH: added prepare command
+    const prepareCommand = "npm run --workspace e2e prepare-local-publish";
+    console.log(`> ${prepareCommand}`);
+    execSync(prepareCommand, {
+      stdio: [0, 1, 2],
+    });
+
+    // JH: added change to dist dir
+    process.chdir("dist");
+
     // Force all projects to be not private
-    const projects = JSON.parse(
-      execSync('npx lerna list --json --all').toString()
-    );
+    const projects = JSON.parse(execSync("npx lerna list --json --all").toString());
     for (const proj of projects) {
       if (proj.private) {
-        console.log('Publishing private package locally:', proj.name);
-        const packageJsonPath = join(proj.location, 'package.json');
-        const original = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-        writeFileSync(
-          packageJsonPath,
-          JSON.stringify({ ...original, private: false })
-        );
+        console.log("Publishing private package locally:", proj.name);
+        const packageJsonPath = join(proj.location, "package.json");
+        const original = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+        writeFileSync(packageJsonPath, JSON.stringify({ ...original, private: false }));
       }
     }
   }
@@ -57,17 +60,17 @@ function hideFromGitIndex(uncommittedFiles: string[]) {
   const versionOptions = {
     bump: options.version ? options.version : undefined,
     conventionalCommits: true,
-    conventionalPrerelease: options.tag === 'next',
+    conventionalPrerelease: options.tag === "next",
     preid: options.preid,
     forcePublish: true,
-    createRelease: options.tag !== 'next' ? 'github' : undefined,
-    noChangelog: options.tag === 'next',
-    tagVersionPrefix: '',
+    createRelease: options.tag !== "next" ? "github" : undefined,
+    noChangelog: options.tag === "next",
+    tagVersionPrefix: "",
     exact: true,
     gitRemote: options.gitRemote,
-    gitTagVersion: options.tag !== 'next',
-    message: 'chore(misc): publish %v',
-    loglevel: options.loglevel ?? 'info',
+    gitTagVersion: options.tag !== "next",
+    message: "chore(misc): publish %v",
+    loglevel: options.loglevel ?? "info",
     yes: false,
   };
 
@@ -75,31 +78,31 @@ function hideFromGitIndex(uncommittedFiles: string[]) {
     versionOptions.conventionalCommits = false;
     delete versionOptions.createRelease;
     versionOptions.gitTagVersion = false;
-    versionOptions.loglevel = options.loglevel ?? 'error';
+    versionOptions.loglevel = options.loglevel ?? "error";
     versionOptions.yes = true;
-    versionOptions.bump = options.version ? options.version : 'minor';
+    versionOptions.bump = options.version ? options.version : "minor";
   }
 
-  const lernaJsonPath = join(__dirname, '../lerna.json');
+  const lernaJsonPath = join(__dirname, "../lerna.json");
   let originalLernaJson: Buffer | undefined;
 
-  if (options.local || options.tag === 'next') {
+  if (options.local || options.tag === "next") {
     originalLernaJson = readFileSync(lernaJsonPath);
   }
   if (options.local) {
     /**
      * Hide changes from Lerna
      */
-    const uncommittedFiles = execSync('git diff --name-only --relative HEAD .')
+    const uncommittedFiles = execSync("git diff --name-only --relative HEAD .")
       .toString()
-      .split('\n')
+      .split("\n")
       .filter((i) => i.length > 0)
       .filter((f) => existsSync(f));
     const unhideFromGitIndex = hideFromGitIndex(uncommittedFiles);
 
-    process.on('exit', unhideFromGitIndex);
-    process.on('SIGTERM', unhideFromGitIndex);
-    process.on('SIGINT', unhideFromGitIndex);
+    process.on("exit", unhideFromGitIndex);
+    process.on("SIGTERM", unhideFromGitIndex);
+    process.on("SIGINT", unhideFromGitIndex);
   }
 
   const publishOptions: Record<string, boolean | string | undefined> = {
@@ -108,10 +111,12 @@ function hideFromGitIndex(uncommittedFiles: string[]) {
   };
 
   if (!options.skipPublish) {
+    // JH: remove unneeded await
     publish({ ...versionOptions, ...publishOptions });
   } else {
+    // JH: remove unneeded await
     version(versionOptions);
-    console.warn('Not Publishing because --dryRun was passed');
+    console.warn("Not Publishing because --dryRun was passed");
   }
 
   if (originalLernaJson) {
@@ -121,95 +126,80 @@ function hideFromGitIndex(uncommittedFiles: string[]) {
 
 function parseArgs() {
   const parsedArgs = yargs
-    .scriptName('yarn nx-release')
+    .scriptName("yarn nx-release")
     .wrap(144)
-    // TODO: do we have a yargs mismatch between lerna and nx?
+    // TODO: JH: why is this showing as a type error in lerna but not nx
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     .strictOptions()
     .version(false)
-    .command(
-      '$0 [version]',
-      'This script is for publishing Nx both locally and publically'
-    )
-    .option('skipPublish', {
-      type: 'boolean',
-      description: 'Skips the actual publishing for testing out versioning',
+    .command("$0 [version]", "This script is for publishing Nx both locally and publically")
+    .option("skipPublish", {
+      type: "boolean",
+      description: "Skips the actual publishing for testing out versioning",
     })
-    .option('clearLocalRegistry', {
-      type: 'boolean',
-      description:
-        'Clear existing versions in the local registry so that you can republish the same version',
+    .option("clearLocalRegistry", {
+      type: "boolean",
+      description: "Clear existing versions in the local registry so that you can republish the same version",
       default: true,
     })
-    .option('local', {
-      type: 'boolean',
-      description: 'Publish Nx locally, not to actual NPM',
-      alias: 'l',
+    .option("local", {
+      type: "boolean",
+      description: "Publish Nx locally, not to actual NPM",
+      alias: "l",
       default: true,
     })
-    .option('force', {
-      type: 'boolean',
+    .option("force", {
+      type: "boolean",
       description: "Don't use this unless you really know what it does",
       hidden: true,
     })
-    .positional('version', {
-      type: 'string',
-      description:
-        'The version to publish. This does not need to be passed and can be inferred.',
+    .positional("version", {
+      type: "string",
+      description: "The version to publish. This does not need to be passed and can be inferred.",
     })
-    .option('gitRemote', {
-      type: 'string',
-      description:
-        'Alternate git remote name to publish tags to (useful for testing changelog)',
-      default: 'origin',
+    .option("gitRemote", {
+      type: "string",
+      description: "Alternate git remote name to publish tags to (useful for testing changelog)",
+      default: "origin",
     })
-    .option('tag', {
-      type: 'string',
-      description: 'NPM Tag',
-      choices: ['next', 'latest', 'previous'],
+    .option("tag", {
+      type: "string",
+      description: "NPM Tag",
+      choices: ["next", "latest", "previous"],
     })
-    .option('preid', {
-      type: 'string',
-      description: 'The kind of prerelease tag. (1.0.0-[preid].0)',
-      choices: ['alpha', 'beta', 'rc'],
-      default: 'beta',
+    .option("preid", {
+      type: "string",
+      description: "The kind of prerelease tag. (1.0.0-[preid].0)",
+      choices: ["alpha", "beta", "rc"],
+      default: "beta",
     })
-    .option('loglevel', {
-      type: 'string',
-      description: 'Log Level',
-      choices: ['error', 'info', 'debug'],
+    .option("loglevel", {
+      type: "string",
+      description: "Log Level",
+      choices: ["error", "info", "debug"],
     })
     .example(
-      '$0',
+      "$0",
       `By default, this will locally publish a minor version bump as latest. Great for local development. Most developers should only need this.`
     )
     .example(
-      '$0 --local false',
+      "$0 --local false",
       `This will really publish a new beta version to npm as next. The version is inferred by the changes.`
     )
     .example(
-      '$0 --local false --tag latest',
+      "$0 --local false --tag latest",
       `This will really publish a new stable version to npm as latest, tag, commit, push, and create a release on GitHub.`
     )
-    .example(
-      '$0 --local false --preid rc',
-      `This will really publish a new rc version to npm as next.`
-    )
-    .group(
-      ['local', 'clearLocalRegistry'],
-      'Local Publishing Options for most developers'
-    )
-    .group(
-      ['preid', 'tag', 'gitRemote', 'force'],
-      'Real Publishing Options for actually publishing to NPM'
-    )
+    .example("$0 --local false --preid rc", `This will really publish a new rc version to npm as next.`)
+    .group(["local", "clearLocalRegistry"], "Local Publishing Options for most developers")
+    .group(["preid", "tag", "gitRemote", "force"], "Real Publishing Options for actually publishing to NPM")
     .check((args) => {
       const registry = getRegistry();
-      const registryIsLocalhost = registry.hostname === 'localhost';
+      const registryIsLocalhost = registry.hostname === "localhost";
       if (!args.local) {
         if (!process.env.GH_TOKEN) {
-          throw new Error('process.env.GH_TOKEN is not set');
+          throw new Error("process.env.GH_TOKEN is not set");
         }
         if (!args.force && registryIsLocalhost) {
           throw new Error(
@@ -218,7 +208,7 @@ function parseArgs() {
         }
       } else {
         if (!args.force && !registryIsLocalhost) {
-          throw new Error('--local was passed and registry is not localhost');
+          throw new Error("--local was passed and registry is not localhost");
         }
       }
 
@@ -226,11 +216,11 @@ function parseArgs() {
     })
     .parseSync();
 
-  parsedArgs.tag ??= parsedArgs.local ? 'latest' : 'next';
+  parsedArgs.tag ??= parsedArgs.local ? "latest" : "next";
 
   return parsedArgs;
 }
 
 function getRegistry() {
-  return new URL(execSync('npm config get registry').toString().trim());
+  return new URL(execSync("npm config get registry").toString().trim());
 }

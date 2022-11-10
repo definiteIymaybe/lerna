@@ -112,7 +112,7 @@
     "write-file-atomic": "^4.0.1",
     "write-json-file": "^4.3.0",
     "write-pkg": "^4.0.0",
-    "yargs": "^16.2.0"
+    "yargs": "^17.6.2"
   },
   "devDependencies": {
     "@lerna-test/helpers": "file:helpers",

@@ -34,6 +34,6 @@
     "@lerna/global-options": "file:../global-options",
     "dedent": "^0.7.0",
     "npmlog": "^6.0.2",
-    "yargs": "^16.2.0"
+    "yargs": "^17.6.2"
   }
 }
