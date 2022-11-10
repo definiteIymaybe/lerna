@@ -33,7 +33,11 @@
     "ci:lint": "eslint . -c .eslintrc.json --no-eslintrc --ignore-path .gitignore",
     "lint": "eslint . -c .eslintrc.json --no-eslintrc --ignore-path .gitignore --ignore-pattern __fixtures__ --cache --cache-location ./node_modules/.cache/eslint",
     "pretest": "npm run lint",
-    "test": "jest"
+    "test": "jest",
+    "e2e-start-local-registry": "node ./scripts/e2e-start-local-registry.js",
+    "e2e-build-package-publish": "ts-node -P ./scripts/tsconfig.e2e.json ./scripts/e2e-build-package-publish.ts",
+    "nx-release": "ts-node -P ./scripts/tsconfig.scripts.json ./scripts/nx-release",
+    "local-registry": "./scripts/local-registry.sh"
   },
   "repository": {
     "type": "git",
