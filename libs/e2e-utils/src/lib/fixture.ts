@@ -97,7 +97,7 @@ export class Fixture {
   private async setNpmRegistry(): Promise<void> {
     if (this.packageManager === "pnpm") {
       await this.exec(`mkdir ${PNPM_STORE}`);
-      await this.exec(`echo "registry=${REGISTRY}\nstore-dir = ${PNPM_STORE}" > .npmrc`);
+      await this.exec(`echo "registry=${REGISTRY}\nstore-dir = ${PNPM_STORE}\nverify-store-integrity=false" > .npmrc`);
     }
   }
 

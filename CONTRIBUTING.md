@@ -106,6 +106,8 @@ $ npm run lint -- --fix
 
 ### Local CLI Testing
 
+> NOTE: You will need to have `pnpm` installed at version `7.7.0` or later in order to run the full suite of e2e tests
+
 If you want to test out Lerna on local repos, you can leverage verdaccio as a local npm regsitry.
 
 Open a new terminal window and run the following from the root of the workspace:

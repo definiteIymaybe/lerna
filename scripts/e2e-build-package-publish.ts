@@ -46,6 +46,7 @@ async function updateVersionsAndPublishPackages() {
   console.log(`\n${NX_PREFIX} 📦 Publishing packages\n`);
   const isVerbose = process.env.NX_VERBOSE_LOGGING === "true" || process.argv.includes("--verbose");
   // JH: changed version to fixed 999.9.9-e2e.0
+  // TODO: discuss with Jason why "major" was chosen here
   const response = execSync(`yarn nx-release 999.9.9-e2e.0 --local`, {
     stdio: isVerbose ? "inherit" : "pipe",
     encoding: "utf8",

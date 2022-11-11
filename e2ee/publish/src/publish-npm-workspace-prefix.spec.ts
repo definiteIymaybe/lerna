@@ -1,6 +1,5 @@
+import { Fixture, normalizeCommitSHAs, normalizeEnvironment } from "@lerna/e2e-utils";
 import { writeJsonFile } from "@nrwl/devkit";
-import { Fixture } from "../../utils/fixture";
-import { normalizeCommitSHAs, normalizeEnvironment } from "../../utils/snapshot-serializer-utils";
 
 const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 const randomVersion = () => `${randomInt(10, 89)}.${randomInt(10, 89)}.${randomInt(10, 89)}`;
