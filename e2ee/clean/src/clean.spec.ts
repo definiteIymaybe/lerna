@@ -1,6 +1,5 @@
+import { Fixture, normalizeEnvironment } from "@lerna/e2e-utils";
 import { existsSync, readdir } from "fs-extra";
-import { Fixture } from "../../utils/fixture";
-import { normalizeEnvironment } from "../../utils/snapshot-serializer-utils";
 
 expect.addSnapshotSerializer({
   serialize(str) {

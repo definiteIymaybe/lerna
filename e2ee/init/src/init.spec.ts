@@ -1,4 +1,4 @@
-import { Fixture } from "../../utils/fixture";
+import { Fixture } from "@lerna/e2e-utils";
 
 describe("lerna-init", () => {
   let fixture: Fixture;
