@@ -14,7 +14,9 @@ function normalizeOptions(_tree: Tree, options: E2eProjectGeneratorSchema): Norm
   const e2eRoot = "e2ee";
   const projectDirectory = options.directory ? `${e2eRoot}/${names(options.directory).fileName}` : e2eRoot;
   const projectRoot = `${projectDirectory}/${names(options.name).fileName}`;
-  const projectName = `${e2eRoot}-${names(options.name).fileName}`;
+  const projectName = `${e2eRoot}${options.directory ? `-${options.directory}` : ""}-${
+    names(options.name).fileName
+  }`;
 
   return {
     ...options,
