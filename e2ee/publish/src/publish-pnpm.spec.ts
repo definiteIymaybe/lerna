@@ -16,7 +16,7 @@ expect.addSnapshotSerializer({
   },
 });
 
-describe("lerna-publish-pnpm qqqq", () => {
+describe("lerna-publish-pnpm", () => {
   let fixture: Fixture;
 
   beforeEach(async () => {
