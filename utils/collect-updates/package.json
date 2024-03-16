@@ -34,7 +34,7 @@
   "dependencies": {
     "@lerna/child-process": "file:../../core/child-process",
     "@lerna/describe-ref": "file:../describe-ref",
-    "minimatch": "^3.0.4",
+    "minimatch": "^9.0.3",
     "npmlog": "^6.0.2",
     "slash": "^3.0.0"
   }
