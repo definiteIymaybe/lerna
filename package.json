@@ -74,7 +74,7 @@
     "libnpmaccess": "^6.0.3",
     "libnpmpublish": "^6.0.4",
     "load-json-file": "^6.2.0",
-    "minimatch": "^3.0.4",
+    "minimatch": "^9.0.3",
     "multimatch": "^5.0.0",
     "node-fetch": "^2.6.1",
     "npm-package-arg": "8.1.1",
@@ -111,7 +111,7 @@
   "devDependencies": {
     "@lerna-test/helpers": "file:helpers",
     "@nrwl/devkit": "14.8.6",
-    "@nrwl/nx-cloud": "14.7.0",
+    "@nrwl/nx-cloud": "18.0.0",
     "@types/fs-extra": "^9.0.13",
     "@types/is-ci": "^2.0.0",
     "@types/jest": "^28.1.4",
