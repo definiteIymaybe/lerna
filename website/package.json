@@ -15,9 +15,9 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.2.0",
-    "@docusaurus/plugin-sitemap": "^2.2.0",
-    "@docusaurus/preset-classic": "^2.2.0",
+    "@docusaurus/core": "^3.2.0",
+    "@docusaurus/plugin-sitemap": "^3.2.0",
+    "@docusaurus/preset-classic": "^3.2.0",
     "@heroicons/react": "^2.0.12",
     "@mdx-js/react": "^1.6.22",
     "clsx": "^1.1.1",
